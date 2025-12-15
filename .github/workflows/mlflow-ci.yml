@@ -26,9 +26,14 @@ jobs:
         python --version
         pip --version
 
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install mlflow dagshub scikit-learn pandas seaborn matplotlib
+
     - name: Set MLflow Tracking URI
       run: |
-        export MLFLOW_TRACKING_URI=https://dagshub.com/${{ github.repository }}.mlflow
+        echo "MLFLOW_TRACKING_URI=https://dagshub.com/${{ github.repository }}.mlflow" >> $GITHUB_ENV
 
     - name: Run MLflow Project
       env:
@@ -38,7 +43,6 @@ jobs:
         mlflow run .
 
     - name: Get latest MLflow run_id
-      id: get_run_id
       run: |
         RUN_ID=$(ls mlruns/*/*/meta.yaml | tail -n 1 | awk -F'/' '{print $(NF-1)}')
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
@@ -58,11 +62,3 @@ jobs:
     - name: Tag Docker Image
       run: |
         docker tag customer-churn-model ${{ secrets.DOCKERHUB_USERNAME }}/customer-churn-model:latest
-
-    - name: Push Docker Image
-      run: |
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/customer-churn-model:latest
-
-    - name: Complete job
-      run: echo "CI Pipeline Completed Successfully"
-
