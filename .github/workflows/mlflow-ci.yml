@@ -31,13 +31,16 @@ jobs:
         pip install --upgrade pip
         pip install mlflow dagshub scikit-learn pandas seaborn matplotlib
 
-    - name: Set MLflow Tracking URI
-      run: |
-        echo "MLFLOW_TRACKING_URI=https://dagshub.com/${{ github.repository }}.mlflow" >> $GITHUB_ENV
-
-    - name: Run MLflow Project
+    - name: Set MLflow Tracking
       env:
         DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_USER_TOKEN }}
+        DAGSHUB_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
+      run: |
+        echo "MLFLOW_TRACKING_URI=https://dagshub.com/${DAGSHUB_USERNAME}/Eksperimen_SML_Salwa-Salsabila-Meyriva.mlflow" >> $GITHUB_ENV
+        echo "MLFLOW_TRACKING_USERNAME=${DAGSHUB_USERNAME}" >> $GITHUB_ENV
+        echo "MLFLOW_TRACKING_PASSWORD=${DAGSHUB_USER_TOKEN}" >> $GITHUB_ENV
+
+    - name: Run MLflow Project
       run: |
         cd MLProject
         mlflow run .
@@ -59,12 +62,9 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Tag Docker Image
-      run: |
-        docker tag customer-churn-model ${{ secrets.DOCKERHUB_USERNAME }}/customer-churn-model:latest
-
     - name: Push Docker Image
       run: |
+        docker tag customer-churn-model ${{ secrets.DOCKERHUB_USERNAME }}/customer-churn-model:latest
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/customer-churn-model:latest
 
     - name: Complete job
