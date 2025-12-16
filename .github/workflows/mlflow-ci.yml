@@ -18,7 +18,7 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Install base dependencies
+    - name: Install dependencies
       run: |
         pip install --upgrade pip
         pip install mlflow dagshub
@@ -28,7 +28,7 @@ jobs:
         DAGSHUB_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
         DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_USER_TOKEN }}
       run: |
-        echo "MLFLOW_TRACKING_URI=https://dagshub.com/${DAGSHUB_USERNAME}/${{ github.repository }}.mlflow" >> $GITHUB_ENV
+        echo "MLFLOW_TRACKING_URI=https://dagshub.com/${DAGSHUB_USERNAME}/Workflow-CI-Customer-Churn.mlflow" >> $GITHUB_ENV
         echo "MLFLOW_TRACKING_USERNAME=${DAGSHUB_USERNAME}" >> $GITHUB_ENV
         echo "MLFLOW_TRACKING_PASSWORD=${DAGSHUB_USER_TOKEN}" >> $GITHUB_ENV
 
@@ -42,7 +42,7 @@ jobs:
         RUN_ID=$(ls mlruns/*/*/meta.yaml | tail -n 1 | awk -F'/' '{print $(NF-1)}')
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
-    - name: Build Docker Image from MLflow Model
+    - name: Build Docker Image
       run: |
         mlflow models build-docker \
           -m runs:/$RUN_ID/RandomForest_Baseline_Model \
