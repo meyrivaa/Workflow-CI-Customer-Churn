@@ -2,7 +2,7 @@ name: MLflow CI Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -16,22 +16,20 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: "3.11"
 
-    - name: Upgrade pip
+    - name: Install base dependencies
       run: |
-        python -m pip install --upgrade pip
+        pip install --upgrade pip
+        pip install mlflow dagshub
 
-    - name: Install dependencies
-      run: |
-        pip install mlflow dagshub scikit-learn pandas seaborn matplotlib
-
-    - name: Configure MLflow + DAGsHub
+    - name: Configure MLflow Tracking (DAGsHub)
       env:
+        DAGSHUB_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
         DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_USER_TOKEN }}
       run: |
-        echo "MLFLOW_TRACKING_URI=https://dagshub.com/<USERNAME_DAGSHUB>/<REPO_DAGSHUB>.mlflow" >> $GITHUB_ENV
-        echo "MLFLOW_TRACKING_USERNAME=<USERNAME_DAGSHUB>" >> $GITHUB_ENV
+        echo "MLFLOW_TRACKING_URI=https://dagshub.com/${DAGSHUB_USERNAME}/${{ github.repository }}.mlflow" >> $GITHUB_ENV
+        echo "MLFLOW_TRACKING_USERNAME=${DAGSHUB_USERNAME}" >> $GITHUB_ENV
         echo "MLFLOW_TRACKING_PASSWORD=${DAGSHUB_USER_TOKEN}" >> $GITHUB_ENV
 
     - name: Run MLflow Project
@@ -44,7 +42,7 @@ jobs:
         RUN_ID=$(ls mlruns/*/*/meta.yaml | tail -n 1 | awk -F'/' '{print $(NF-1)}')
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
-    - name: Build Docker Model
+    - name: Build Docker Image from MLflow Model
       run: |
         mlflow models build-docker \
           -m runs:/$RUN_ID/RandomForest_Baseline_Model \
@@ -56,10 +54,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Tag Docker Image
-      run: |
-        docker tag customer-churn-model ${{ secrets.DOCKERHUB_USERNAME }}/customer-churn-model:latest
-
     - name: Push Docker Image
       run: |
+        docker tag customer-churn-model ${{ secrets.DOCKERHUB_USERNAME }}/customer-churn-model:latest
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/customer-churn-model:latest
