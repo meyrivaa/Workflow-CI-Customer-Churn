@@ -1,8 +1,6 @@
-name: customer-churn-env
-
+name: mlflow-env
 channels:
   - conda-forge
-
 dependencies:
   - python=3.11
   - pip
@@ -10,6 +8,6 @@ dependencies:
       - mlflow
       - scikit-learn
       - pandas
-      - seaborn
       - matplotlib
+      - seaborn
       - dagshub
