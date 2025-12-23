@@ -45,15 +45,11 @@ jobs:
               check=True
           )
 
-          client = mlflow.tracking.MlflowClient()
-          exp = client.get_experiment_by_name("Modeling_Customer_Churn")
-          runs = client.search_runs(
-              experiment_ids=[exp.experiment_id],
-              order_by=["start_time DESC"],
-              max_results=1
-          )
+          run = mlflow.last_active_run()
+          if run is None:
+              raise RuntimeError("No MLflow run found")
 
-          run_id = runs[0].info.run_id
+          run_id = run.info.run_id
           print("RUN_ID =", run_id)
 
           with open(os.environ["GITHUB_ENV"], "a") as f:
@@ -61,8 +57,7 @@ jobs:
           EOF
 
       - name: Debug RUN_ID
-        run: |
-          echo "RUN_ID is: '$RUN_ID'"
+        run: echo "RUN_ID is $RUN_ID"
 
       - name: Build Docker Image
         run: |
