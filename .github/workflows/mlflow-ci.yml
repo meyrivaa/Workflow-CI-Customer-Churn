@@ -41,11 +41,8 @@ jobs:
     - name: Run MLflow Project
       run: |
         cd MLProject
-        mlflow run . --env-manager=local
-
-    - name: Get latest MLflow run_id
-      run: |
-        RUN_ID=$(ls mlruns/*/*/meta.yaml | tail -n 1 | awk -F'/' '{print $(NF-1)}')
+        mlflow run . --env-manager=local | tee mlflow_output.txt
+        RUN_ID=$(grep -oE 'Run ID: [a-f0-9]+' mlflow_output.txt | awk '{print $3}')
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
     - name: Build Docker Image
