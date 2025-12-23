@@ -3,3 +3,4 @@ name: customer-churn-mlflow
 entry_points:
   main:
     command: "python modelling.py"
+    python_env: python_env.yaml
