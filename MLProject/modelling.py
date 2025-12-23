@@ -11,14 +11,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Config
-EXPERIMENT_NAME = "Modeling_Customer_Churn"
 DATA_PATH = "ecommerce-customer-churn_dataset_preprocessing.csv"
-MODEL_NAME = "customer_churn_model"  
-
-mlflow.set_experiment(EXPERIMENT_NAME)
+MODEL_NAME = "customer_churn_model"
 
 # Load dataset
 df = pd.read_csv(DATA_PATH)
+
+print("Kolom dataset:")
+print(df.columns)
 
 leakage_cols = [
     "customer_id",
@@ -38,7 +38,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# Training
+# Train model
 model = RandomForestClassifier(
     n_estimators=100,
     max_depth=8,
@@ -66,10 +66,10 @@ plt.close()
 
 mlflow.log_artifact("artifacts/confusion_matrix.png")
 
-# Log Model
+# Log model 
 mlflow.sklearn.log_model(
     sk_model=model,
-    name=MODEL_NAME,  
+    name=MODEL_NAME
 )
 
-print(f"Model logged with name = {MODEL_NAME}")
+print(f"Model logged as '{MODEL_NAME}'")
