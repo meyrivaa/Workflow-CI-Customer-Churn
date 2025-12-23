@@ -13,6 +13,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
       - name: Install MLflow & DAGsHub
         run: |
           pip install --upgrade pip
@@ -33,8 +38,7 @@ jobs:
           mlflow run .
 
           python - << 'EOF'
-          import mlflow
-          import os
+          import mlflow, os
 
           run = mlflow.last_active_run()
           if run is None:
