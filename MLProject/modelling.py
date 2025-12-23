@@ -11,12 +11,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Config
-EXPERIMENT_NAME = "Modeling_Customer_Churn"
 DATA_PATH = "ecommerce-customer-churn_dataset_preprocessing.csv"
 MODEL_ARTIFACT_PATH = "RandomForest_Baseline_Model"
-
-mlflow.set_experiment(EXPERIMENT_NAME)
-
 
 # Load Data
 if not os.path.exists(DATA_PATH):
@@ -26,7 +22,6 @@ df = pd.read_csv(DATA_PATH)
 
 print("Kolom dataset:")
 print(df.columns)
-
 
 # Feature & Target
 leakage_cols = [
@@ -51,69 +46,66 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
+# Train Model (TANPA start_run)
+model = RandomForestClassifier(
+    n_estimators=100,
+    max_depth=8,
+    min_samples_split=10,
+    random_state=42,
+    class_weight="balanced",
+)
 
-# Train & Log
-with mlflow.start_run(run_name="RandomForest-Baseline"):
+model.fit(X_train, y_train)
 
-    model = RandomForestClassifier(
-        n_estimators=100,
-        max_depth=8,
-        min_samples_split=10,
-        random_state=42,
-        class_weight="balanced",
-    )
+train_pred = model.predict(X_train)
+test_pred = model.predict(X_test)
 
-    model.fit(X_train, y_train)
+train_acc = accuracy_score(y_train, train_pred)
+test_acc = accuracy_score(y_test, test_pred)
 
-    train_pred = model.predict(X_train)
-    test_pred = model.predict(X_test)
+print("Train Accuracy:", train_acc)
+print("Test Accuracy :", test_acc)
 
-    train_acc = accuracy_score(y_train, train_pred)
-    test_acc = accuracy_score(y_test, test_pred)
+print("\nClassification Report:")
+print(classification_report(y_test, test_pred))
 
-    print("Train Accuracy:", train_acc)
-    print("Test Accuracy :", test_acc)
+# Log params & metrics
+mlflow.log_param("model", "RandomForestClassifier")
+mlflow.log_param("n_estimators", 100)
+mlflow.log_param("max_depth", 8)
+mlflow.log_param("min_samples_split", 10)
+mlflow.log_param("class_weight", "balanced")
 
-    print("\nClassification Report:")
-    print(classification_report(y_test, test_pred))
+mlflow.log_metric("train_accuracy", train_acc)
+mlflow.log_metric("test_accuracy", test_acc)
 
-    # Log Prams & Metrics
-    mlflow.log_param("model", "RandomForestClassifier")
-    mlflow.log_param("n_estimators", 100)
-    mlflow.log_param("max_depth", 8)
-    mlflow.log_param("min_samples_split", 10)
-    mlflow.log_param("class_weight", "balanced")
+# Artifacts
+os.makedirs("artifacts", exist_ok=True)
 
-    mlflow.log_metric("train_accuracy", train_acc)
-    mlflow.log_metric("test_accuracy", test_acc)
+cm = confusion_matrix(y_test, test_pred)
 
-    # Artifacts
-    os.makedirs("artifacts", exist_ok=True)
+plt.figure(figsize=(6, 4))
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+plt.title("Confusion Matrix - Baseline Model")
+plt.ylabel("True Label")
+plt.xlabel("Predicted Label")
 
-    cm = confusion_matrix(y_test, test_pred)
+cm_path = "artifacts/confusion_matrix_baseline.png"
+plt.savefig(cm_path)
+plt.close()
 
-    plt.figure(figsize=(6, 4))
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
-    plt.title("Confusion Matrix - Baseline Model")
-    plt.ylabel("True Label")
-    plt.xlabel("Predicted Label")
+mlflow.log_artifact(cm_path)
 
-    cm_path = "artifacts/confusion_matrix_baseline.png"
-    plt.savefig(cm_path)
-    plt.close()
+report_path = "artifacts/classification_report_baseline.txt"
+with open(report_path, "w") as f:
+    f.write(classification_report(y_test, test_pred))
 
-    mlflow.log_artifact(cm_path)
+mlflow.log_artifact(report_path)
 
-    report_path = "artifacts/classification_report_baseline.txt"
-    with open(report_path, "w") as f:
-        f.write(classification_report(y_test, test_pred))
+# Log Model
+mlflow.sklearn.log_model(
+    sk_model=model,
+    artifact_path=MODEL_ARTIFACT_PATH,
+)
 
-    mlflow.log_artifact(report_path)
-
-    # Log Model
-    mlflow.sklearn.log_model(
-        sk_model=model,
-        artifact_path=MODEL_ARTIFACT_PATH,
-    )
-
-    print(f"Model logged to MLflow as '{MODEL_ARTIFACT_PATH}'")
+print(f"Model logged to MLflow as '{MODEL_ARTIFACT_PATH}'")
