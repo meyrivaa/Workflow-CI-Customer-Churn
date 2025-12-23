@@ -1,1 +1,9 @@
+python: "3.11"
+dependencies:
+  - mlflow
+  - scikit-learn
+  - pandas
+  - matplotlib
+  - seaborn
+  - dagshub
 
