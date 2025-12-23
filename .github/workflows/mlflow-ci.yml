@@ -18,10 +18,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install MLflow & DAGsHub
+      - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install mlflow dagshub
+          pip install mlflow dagshub scikit-learn pandas matplotlib seaborn
 
       - name: Configure MLflow Tracking (DAGsHub)
         env:
@@ -36,16 +36,13 @@ jobs:
         run: |
           cd MLProject
 
-          # Jalankan MLflow Project
-          mlflow run .
+          # ⛔ PENTING: pakai env-manager=local
+          mlflow run . --env-manager=local
 
-          # Ambil RUN_ID terbaru dari tracking server
           python - << 'EOF'
-          import mlflow
-          import os
+          import mlflow, os
 
           client = mlflow.tracking.MlflowClient()
-
           runs = client.search_runs(
               experiment_ids=["0"],
               order_by=["start_time DESC"],
