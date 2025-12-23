@@ -64,7 +64,7 @@ jobs:
       - name: Build Docker Image
         run: |
           mlflow models build-docker \
-            -m runs:/$RUN_ID/model \
+            -m runs:/$RUN_ID/RandomForest_Baseline_Model \
             -n customer-churn-model
 
       - name: Login to Docker Hub
