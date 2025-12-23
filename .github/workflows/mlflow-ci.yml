@@ -18,10 +18,16 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install MLflow & DAGsHub
+      - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install mlflow dagshub
+          pip install \
+            mlflow \
+            dagshub \
+            scikit-learn \
+            pandas \
+            matplotlib \
+            seaborn
 
       - name: Configure MLflow Tracking (DAGsHub)
         env:
@@ -35,7 +41,7 @@ jobs:
       - name: Run MLflow Project & Capture RUN_ID
         run: |
           cd MLProject
-          mlflow run .
+          mlflow run . --env-manager=local
 
           python - << 'EOF'
           import mlflow, os
@@ -50,9 +56,6 @@ jobs:
           with open(os.environ["GITHUB_ENV"], "a") as f:
               f.write(f"RUN_ID={run_id}\n")
           EOF
-
-      - name: Debug RUN_ID
-        run: echo "RUN_ID=$RUN_ID"
 
       - name: Build Docker Image
         run: |
