@@ -32,16 +32,17 @@ jobs:
         echo "MLFLOW_TRACKING_USERNAME=${DAGSHUB_USERNAME}" >> $GITHUB_ENV
         echo "MLFLOW_TRACKING_PASSWORD=${DAGSHUB_USER_TOKEN}" >> $GITHUB_ENV
 
-    - name: Run MLflow Project
+    - name: Run MLflow Project & Capture RUN_ID
       run: |
         cd MLProject
-        mlflow run . --env-manager=local
+        mlflow run . --env-manager=local | tee mlflow.log
 
-    - name: Get latest MLflow run_id
-      run: |
-        RUN_ID=$(ls MLProject/mlruns/*/*/meta.yaml | tail -n 1 | awk -F'/' '{print $(NF-1)}')
+        RUN_ID=$(grep -oE "run with ID '[a-f0-9]+'" mlflow.log | tail -1 | awk -F"'" '{print $2}')
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
         echo "Captured RUN_ID=$RUN_ID"
+
+    - name: Debug RUN_ID
+      run: echo "RUN_ID=$RUN_ID"
 
     - name: Build Docker Image
       run: |
