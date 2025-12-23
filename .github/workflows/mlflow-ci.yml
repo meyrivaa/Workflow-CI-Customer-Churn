@@ -35,7 +35,6 @@ jobs:
       - name: Run MLflow Project & Capture RUN_ID
         run: |
           cd MLProject
-
           mlflow run . --env-manager=local
 
           python - << 'EOF'
@@ -73,7 +72,7 @@ jobs:
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_USER_TOKEN }}
         run: |
           mlflow models build-docker \
-            -m runs:/$RUN_ID/RandomForest_Baseline_Model \
+            -m runs:/$RUN_ID/model \
             -n customer-churn-model
 
       - name: Login to Docker Hub
