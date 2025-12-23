@@ -1,4 +1,4 @@
-name: customer-churn-project
+name: customer-churn-mlflow
 
 conda_env: conda.yaml
 
