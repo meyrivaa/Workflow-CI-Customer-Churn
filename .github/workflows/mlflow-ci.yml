@@ -1,4 +1,4 @@
-name: MLflow CI Pipeline
+name: MLflow CI Pipeline 
 
 on:
   push:
