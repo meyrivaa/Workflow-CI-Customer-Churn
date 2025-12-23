@@ -36,7 +36,6 @@ jobs:
         run: |
           cd MLProject
 
-          # ⛔ PENTING: pakai env-manager=local
           mlflow run . --env-manager=local
 
           python - << 'EOF'
@@ -65,7 +64,7 @@ jobs:
       - name: Build Docker Image
         run: |
           mlflow models build-docker \
-            -m runs:/$RUN_ID/RandomForest_Baseline_Model \
+            -m runs:/$RUN_ID/customer_churn_model \
             -n customer-churn-model
 
       - name: Login to Docker Hub
