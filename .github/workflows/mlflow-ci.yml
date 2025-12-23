@@ -13,12 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install base dependencies
+      - name: Install MLflow & DAGsHub
         run: |
           pip install --upgrade pip
           pip install mlflow dagshub
@@ -35,15 +30,11 @@ jobs:
       - name: Run MLflow Project & Capture RUN_ID
         run: |
           cd MLProject
+          mlflow run .
+
           python - << 'EOF'
           import mlflow
-          import subprocess
           import os
-
-          subprocess.run(
-              ["mlflow", "run", ".", "--env-manager=virtualenv"],
-              check=True
-          )
 
           run = mlflow.last_active_run()
           if run is None:
@@ -57,7 +48,7 @@ jobs:
           EOF
 
       - name: Debug RUN_ID
-        run: echo "RUN_ID is $RUN_ID"
+        run: echo "RUN_ID=$RUN_ID"
 
       - name: Build Docker Image
         run: |
