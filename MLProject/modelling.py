@@ -1,5 +1,4 @@
 import pandas as pd
-import dagshub
 import mlflow
 import mlflow.sklearn
 
@@ -10,13 +9,6 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
-
-# Menghubungkan ke DagsHub + MLflow
-dagshub.init(
-    repo_owner="meyrivaa",
-    repo_name="Eksperimen_SML_Salwa-Salsabila-Meyriva",
-    mlflow=True
-)
 
 mlflow.set_experiment("Modeling_Customer_Churn")
 
@@ -113,3 +105,4 @@ with mlflow.start_run(run_name="RandomForest-Baseline"):
 
     # Save Model
     mlflow.sklearn.log_model(model, "RandomForest_Baseline_Model")
+
