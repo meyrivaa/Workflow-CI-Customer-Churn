@@ -18,10 +18,16 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Install base dependencies
+    - name: Install dependencies (pip)
       run: |
         pip install --upgrade pip
-        pip install mlflow dagshub
+        pip install \
+          mlflow \
+          dagshub \
+          scikit-learn \
+          pandas \
+          matplotlib \
+          seaborn
 
     - name: Configure MLflow Tracking (DAGsHub)
       env:
@@ -35,7 +41,7 @@ jobs:
     - name: Run MLflow Project
       run: |
         cd MLProject
-        mlflow run . --env-manager=conda
+        mlflow run . --env-manager=local
 
     - name: Get latest MLflow run_id
       run: |
