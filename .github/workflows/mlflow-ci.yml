@@ -44,7 +44,6 @@ jobs:
           echo "Running MLflow project..."
           OUTPUT=$(mlflow run . --env-manager=local 2>&1 | tee /tmp/mlflow_run.log)
 
-          # Ambil RUN_ID dari baris: run with ID 'xxxxxxxx...'
           RUN_ID=$(echo "$OUTPUT" | grep -oE "run with ID '[0-9a-f]+'" | head -n 1 | sed -E "s/.*'([0-9a-f]+)'.*/\1/")
 
           if [ -z "$RUN_ID" ]; then
