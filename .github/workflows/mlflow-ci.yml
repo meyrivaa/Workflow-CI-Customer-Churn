@@ -18,16 +18,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install MLflow & DAGsHub
         run: |
           pip install --upgrade pip
-          pip install \
-            mlflow \
-            dagshub \
-            scikit-learn \
-            pandas \
-            matplotlib \
-            seaborn
+          pip install mlflow dagshub
 
       - name: Configure MLflow Tracking (DAGsHub)
         env:
@@ -41,21 +35,35 @@ jobs:
       - name: Run MLflow Project & Capture RUN_ID
         run: |
           cd MLProject
-          mlflow run . --env-manager=local
 
+          # Jalankan MLflow Project
+          mlflow run .
+
+          # Ambil RUN_ID terbaru dari tracking server
           python - << 'EOF'
-          import mlflow, os
+          import mlflow
+          import os
 
-          run = mlflow.last_active_run()
-          if run is None:
-              raise RuntimeError("No MLflow run found")
+          client = mlflow.tracking.MlflowClient()
 
-          run_id = run.info.run_id
+          runs = client.search_runs(
+              experiment_ids=["0"],
+              order_by=["start_time DESC"],
+              max_results=1
+          )
+
+          if not runs:
+              raise RuntimeError("No MLflow runs found")
+
+          run_id = runs[0].info.run_id
           print("RUN_ID =", run_id)
 
           with open(os.environ["GITHUB_ENV"], "a") as f:
               f.write(f"RUN_ID={run_id}\n")
           EOF
+
+      - name: Debug RUN_ID
+        run: echo "RUN_ID=$RUN_ID"
 
       - name: Build Docker Image
         run: |
