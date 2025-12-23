@@ -1,5 +1,5 @@
 name: MLflow CI Pipeline
- 
+
 on:
   push:
     branches: ["main"]
@@ -18,7 +18,7 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Install dependencies
+    - name: Install base dependencies
       run: |
         pip install --upgrade pip
         pip install mlflow dagshub
@@ -35,7 +35,7 @@ jobs:
     - name: Run MLflow Project
       run: |
         cd MLProject
-        mlflow run . --env-manager=local
+        mlflow run . --env-manager=conda
 
     - name: Get latest MLflow run_id
       run: |
