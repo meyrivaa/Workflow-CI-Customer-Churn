@@ -41,7 +41,7 @@ jobs:
           import os
 
           subprocess.run(
-              ["mlflow", "run", ".", "--env-manager=conda"],
+              ["mlflow", "run", ".", "--env-manager=virtualenv"],
               check=True
           )
 
