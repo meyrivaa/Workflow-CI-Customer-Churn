@@ -69,8 +69,9 @@ mlflow.log_artifact("artifacts/confusion_matrix.png")
 # Log model 
 mlflow.sklearn.log_model(
     sk_model=model,
-    artifact_path="model"
+    name="model"
 )
 
 print(f"Model logged as '{MODEL_NAME}'")
+
 
